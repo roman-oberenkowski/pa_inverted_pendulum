@@ -3,6 +3,7 @@ from bokeh.io import curdoc
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Slider, TextInput
 from bokeh.plotting import figure, show, output_file
+from bokeh.models.ranges import Range1d
 # data from simulation
 from Simulation import FullSimulator
 
@@ -21,7 +22,7 @@ class InvertedPendulumVisualization:
 
         # other
         self.frame_time=10
-        self.debug=True
+        self.debug = True
         self.frame = 0
         self.y_range = [-15, 15] # temp for target line
         self.time_results, self.position_results, self.angle_results = ([], [], [])
@@ -47,14 +48,15 @@ class InvertedPendulumVisualization:
 
         # setup graphs under animation
         self.plot_theta = figure(
-            plot_height=250, plot_width=800, title="Theta", tools="crosshair,pan,reset,save,wheel_zoom")
-        self.line_theta = self.plot_theta.line(
+            plot_height=250, plot_width=800, title="Theta", tools="crosshair,pan,reset,save,wheel_zoom")#y_range=[-np.pi*1.1, np.pi*1.1]
+        self.plot_line_theta = self.plot_theta.line(
             'x', 'theta', source=self.graph_under_cds)
         self.plot_position = figure(
             plot_height=250, plot_width=800, title="Pozycja", tools="crosshair,pan,reset,save,wheel_zoom")
-        self.line_position = self.plot_position.line(
+        self.plot_line_position = self.plot_position.line(
             'x', 'position', source=self.graph_under_cds)
         plots_list = [self.plot_theta, self.plot_position]
+
         # Set up widgets-> SLIDERS:
         self.pendulum_mass_slider = Slider(
             title="Mass of the ball", value=self.pendulum_mass, start=0.1, end=2.0, step=0.1)
@@ -116,8 +118,8 @@ class InvertedPendulumVisualization:
         theta0 = self.pendulum_angle_slider.value
         pendulum_mass = self.pendulum_mass_slider.value
         cart_mass = self.cart_mass_slider.value
-        x0=self.start_cart_position_slider.value
-        x=self.target_cart_position
+        x0 = self.start_cart_position_slider.value
+        x = self.target_cart_position
         cart_rub = 0.1
         pendulum_inertia = (self.pendulum_length**2) * pendulum_mass
         theta = 0
@@ -131,11 +133,22 @@ class InvertedPendulumVisualization:
         self.ip_temp_dict['ball_size'] = [pendulum_mass * 10]
         self.frame = 0
 
-        # drawing zaleznosci czasowe (graph_under) -> update CDS
-        self.graph_under_dict['x']=self.time_results
+
+        # drawing zaleznosci czasowe (graph_under) ->
+        # update xyranges
+        time_min = min(self.time_results)
+        time_max = max(self.time_results)
+        pos_min = min(self.position_results)
+        pos_max = max(self.position_results)
+
+        #self.plot_position.y_range = Range1d(pos_min, pos_max)
+        #self.plot_position.y_range = Range1d(pos_min, pos_max)
+        # self.animation.x_range = Range1d(pos_min-10, pos_max+10) # fix it maybe
+        # update CDS
+        self.graph_under_dict['x'] = self.time_results
         self.graph_under_dict['theta'] = self.angle_results
         self.graph_under_dict['position'] = self.position_results
-        self.graph_under_cds.data=self.graph_under_dict
+        self.graph_under_cds.data = self.graph_under_dict
 
         self.draw_next_frame()
         #print(self.ip_temp_dict)
