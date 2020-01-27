@@ -1,9 +1,8 @@
 import numpy as np
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, Slider, TextInput
-from bokeh.plotting import figure, show, output_file
-from bokeh.models.ranges import Range1d
+from bokeh.models import ColumnDataSource, Slider
+from bokeh.plotting import figure
 # data from simulation
 from Simulation import FullSimulator
 
@@ -21,18 +20,20 @@ class InvertedPendulumVisualization:
         self.target_cart_position = 1
 
         # other
-        self.frame_time=10
+        self.frame_time = 20
         self.debug = True
         self.frame = 0
-        self.y_range = [-15, 15] # temp for target line
+        self.y_range = [-15, 15]  # temp for target line
         self.time_results, self.position_results, self.angle_results = ([], [], [])
 
         # CDS-przechowuja zmieniajace sie dane i automatycznie akutualizuja wykres-------------------------------------
-        self.ip_temp_dict = dict(base_x=[0], base_y=[0], base_h=[5], base_w=[0.3], ball_x=[0], ball_y=[-5], ball_size=[10])
+        self.ip_temp_dict = dict(base_x=[0], base_y=[0], base_h=[5], base_w=[0.3], ball_x=[0], ball_y=[-5],
+                                 ball_size=[10])
         self.ip_animation_data = ColumnDataSource(data=self.ip_temp_dict)
         self.line_temp_dict = dict(line_xs=[0, 0], line_ys=[0, -5])
         self.line_animation_data = ColumnDataSource(data=self.line_temp_dict)
-        self.graph_under_dict = dict(x=[1, 2, 3, 4], theta=[np.pi, np.pi / 2, np.pi / 3, np.pi / 4],position=[1, 2, 3, 7])
+        self.graph_under_dict = dict(x=[1, 2, 3, 4], theta=[np.pi, np.pi / 2, np.pi / 3, np.pi / 4],
+                                     position=[1, 2, 3, 7])
         self.graph_under_cds = ColumnDataSource(data=self.graph_under_dict)
 
         # Set up animation drawing
@@ -48,7 +49,8 @@ class InvertedPendulumVisualization:
 
         # setup graphs under animation
         self.plot_theta = figure(
-            plot_height=250, plot_width=800, title="Theta", tools="crosshair,pan,reset,save,wheel_zoom")#y_range=[-np.pi*1.1, np.pi*1.1]
+            plot_height=250, plot_width=800, title="Theta",
+            tools="crosshair,pan,reset,save,wheel_zoom")  # y_range=[-np.pi*1.1, np.pi*1.1]
         self.plot_line_theta = self.plot_theta.line(
             'x', 'theta', source=self.graph_under_cds)
         self.plot_position = figure(
@@ -67,42 +69,44 @@ class InvertedPendulumVisualization:
         self.pendulum_length_slider = Slider(
             title="Length", value=self.pendulum_length, start=0.1, end=1.0, step=0.1)
         self.pendulum_angle_slider = Slider(
-            title="Start Angle", value=self.pendulum_angle, start=-np.pi/2, end=np.pi/2, step=np.pi / 36)
+            title="Start Angle", value=self.pendulum_angle, start=-np.pi / 2, end=np.pi / 2, step=np.pi / 36)
         self.start_cart_position_slider = Slider(
             title="start_cart_position", value=self.start_cart_position, start=-10.0, end=10.0, step=1)
         self.target_cart_position_slider = Slider(
             title="target_cart_position", value=0.0, start=-10.0, end=10.0, step=1)
         slider_list = [self.pendulum_mass_slider, self.cart_mass_slider, self.gravity_slider,
-                       self.pendulum_length_slider, self.pendulum_angle_slider, self.start_cart_position_slider, self.target_cart_position_slider]
-
+                       self.pendulum_length_slider, self.pendulum_angle_slider, self.start_cart_position_slider,
+                       self.target_cart_position_slider]
 
         # layout
         curdoc().title = "Inverted pendulum AK TK RO"
         self.inputs = column(children=slider_list)
-        curdoc().add_root(column(children=[row(self.inputs, self.animation)]+plots_list))
+        curdoc().add_root(column(children=[row(self.inputs, self.animation)] + plots_list))
 
         self.update_parameters(0, 0, 0)
         # callbacks
         curdoc().add_periodic_callback(self.draw_next_frame, self.frame_time)
-        for w in [self.pendulum_mass_slider,self.cart_mass_slider, self.gravity_slider, self.pendulum_length_slider, self.pendulum_angle_slider, self.start_cart_position_slider, self.target_cart_position_slider]:
+        for w in [self.pendulum_mass_slider, self.cart_mass_slider, self.gravity_slider, self.pendulum_length_slider,
+                  self.pendulum_angle_slider, self.start_cart_position_slider, self.target_cart_position_slider]:
             w.on_change('value', self.update_parameters)
 
     def draw_next_frame(self):
-        if self.frame >= len(self.angle_results)-1:
+        if self.frame >= len(self.angle_results) - 1:
             return
         theta = self.angle_results[self.frame]
-        current_cart_position=self.position_results[self.frame]*50
+        current_cart_position = self.position_results[self.frame]
 
         if self.debug:
-            print("stopnie obecnie: "+ str(theta/np.pi*180))
+            print("stopnie obecnie: " + str(theta / np.pi * 180))
 
-        dx = np.sin(theta) * self.pendulum_length*10
-        dy = np.cos(theta) * self.pendulum_length*10
+        dx = np.sin(theta) * self.pendulum_length * 10
+        dy = np.cos(theta) * self.pendulum_length * 10
 
         self.ip_temp_dict['ball_x'] = [current_cart_position + dx]
         self.ip_temp_dict['ball_y'] = [dy]
         self.ip_temp_dict['base_x'] = [current_cart_position]
-        self.line_temp_dict['line_xs'] = [current_cart_position, current_cart_position + dx, np.nan, self.target_cart_position, self.target_cart_position]
+        self.line_temp_dict['line_xs'] = [current_cart_position, current_cart_position + dx, np.nan,
+                                          self.target_cart_position, self.target_cart_position]
         self.line_temp_dict['line_ys'] = [0, dy, np.nan, self.y_range[0], self.y_range[1]]
 
         self.line_animation_data.data = self.line_temp_dict
@@ -121,18 +125,19 @@ class InvertedPendulumVisualization:
         x0 = self.start_cart_position_slider.value
         x = self.target_cart_position
         cart_rub = 0.1
-        pendulum_inertia = (self.pendulum_length**2) * pendulum_mass
+        pendulum_inertia = (self.pendulum_length ** 2) * pendulum_mass
         theta = 0
-        # simulator = FullSimulator.FullSimulator(0.5, 0.1, 0.2, 0.6, 0.006, 0, 0.314, 0, 0, 9.81)
-        simulator = FullSimulator.FullSimulator(cart_mass, cart_rub, pendulum_mass, self.pendulum_length, pendulum_inertia, x0, theta0, x, theta, self.gravity)
-        print(cart_mass, cart_rub, pendulum_mass, self.pendulum_length, pendulum_inertia, x0, theta0, x, theta, self.gravity)
+        # simulator = FullSimulator.FullSimulator(0.5, 0.1, 0.2, 0.6, 0.006, 0, 0.314, 0, 0, 9.81, tk=50, tp=0.01)
+        simulator = FullSimulator.FullSimulator(cart_mass, cart_rub, pendulum_mass, self.pendulum_length,
+                                                pendulum_inertia, x0, theta0, x, theta, self.gravity)
+        print(cart_mass, cart_rub, pendulum_mass, self.pendulum_length, pendulum_inertia, x0, theta0, x, theta,
+              self.gravity)
         # (0.5, 0.1, 0.2, 0.6, 0.006, 0, 0, 2, 0, 9.81)
         simulator.simulate()
         self.time_results, self.position_results, self.angle_results = simulator.get_result()
 
         self.ip_temp_dict['ball_size'] = [pendulum_mass * 10]
         self.frame = 0
-
 
         # drawing zaleznosci czasowe (graph_under) ->
         # update xyranges
@@ -141,8 +146,8 @@ class InvertedPendulumVisualization:
         pos_min = min(self.position_results)
         pos_max = max(self.position_results)
 
-        #self.plot_position.y_range = Range1d(pos_min, pos_max)
-        #self.plot_position.y_range = Range1d(pos_min, pos_max)
+        # self.plot_position.y_range = Range1d(pos_min, pos_max)
+        # self.plot_position.y_range = Range1d(pos_min, pos_max)
         # self.animation.x_range = Range1d(pos_min-10, pos_max+10) # fix it maybe
         # update CDS
         self.graph_under_dict['x'] = self.time_results
@@ -151,7 +156,7 @@ class InvertedPendulumVisualization:
         self.graph_under_cds.data = self.graph_under_dict
 
         self.draw_next_frame()
-        #print(self.ip_temp_dict)
+        # print(self.ip_temp_dict)
 
 
 test = InvertedPendulumVisualization()

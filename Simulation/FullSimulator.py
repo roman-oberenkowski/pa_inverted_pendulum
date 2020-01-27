@@ -49,5 +49,14 @@ class FullSimulator(AbstractSimulator.AbstractSimulator):
 
         return
 
+    def set_altarpiece(self, x, theta):
+        self.location_regulator.reset(self.x - x)
+        self.angle_regulator.reset(self.theta - theta)
+
+        self.theta = theta
+        self.x = x
+
+        return
+
     def get_result(self):
         return self.time, self.location, self.angle

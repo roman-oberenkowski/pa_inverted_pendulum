@@ -11,7 +11,7 @@ class AbstractRegulator:
 
     def calculate_real_time(self, e):
         actual_time = time.time()
-        delta_time = self.last_time = actual_time
+        delta_time = self.last_time - actual_time
 
         if delta_time >= self.tp:
             self.calculate_step(e, delta_time)

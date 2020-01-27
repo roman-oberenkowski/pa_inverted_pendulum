@@ -1,5 +1,5 @@
 from Objects import Cart, Pendulum, InversePendulum
-from Regulators import AbstractRegulator, PID
+from Regulators import PID
 import math
 
 
@@ -10,8 +10,8 @@ class AbstractSimulator:
 
         self.inverse_pendulum = InversePendulum.InversePendulum(cart, pendulum, g, x0, theta0)
 
-        self.angle_regulator = PID.PID(-50.8, 7.26, 0.24, 0.1)
-        self.location_regulator = PID.PID(6, math.inf, 1.5, 0.1)
+        self.angle_regulator = PID.PID(-50.8, 7.26, 0.24, 0.01, e0=theta-theta0)
+        self.location_regulator = PID.PID(6, math.inf, 1.5, 0.01, e0=x-x0)
         self.x = x
         self.theta = theta
 

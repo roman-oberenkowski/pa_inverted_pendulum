@@ -2,7 +2,7 @@ from Regulators import AbstractRegulator
 
 
 class PID(AbstractRegulator.AbstractRegulator):
-    def __init__(self, kp, ti, td, tp, windup_guard=50, e0=0):
+    def __init__(self, kp, ti, td, tp, windup_guard=50, e0=0, x0=0):
         super().__init__(tp)
         self.kp = kp
         self.ti = ti
@@ -21,15 +21,15 @@ class PID(AbstractRegulator.AbstractRegulator):
 
     def calculate_step(self, e, tp):
         self.PTerm = e
-        self.ITerm += tp * e
-        self.DTerm = (e - self.last_e) / tp
+        self.ITerm += self.tp / self.ti * e
+        self.DTerm = (e - self.last_e) / self.tp
 
         if self.ITerm < -self.windup_guard:
             self.ITerm = -self.windup_guard
         elif self.ITerm > self.windup_guard:
             self.ITerm = self.windup_guard
 
-        self.u = self.kp * (self.PTerm + self.ITerm / self.ti + self.DTerm * tp)
+        self.u = self.kp * (self.PTerm + self.ITerm + self.DTerm * self.td)
 
         self.last_e = e
 
