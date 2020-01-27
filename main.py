@@ -99,13 +99,14 @@ class InvertedPendulumVisualization:
         #    return
         #theta = self.angle_results[self.frame]
         #current_cart_position = self.position_results[self.frame]
+        self.simulator.simulate()
         a, b, c = self.simulator.get_result()
-        self.time_results.append(a)
+        print(a,b,c)
+        self.time_results.append(-a)
         self.position_results.append(b)
         self.angle_results.append(c)
-        theta=self.angle_results[-1]
-        print(self.angle_results)
-        current_cart_position=self.position_results[-1]
+        theta=c
+        current_cart_position=b
         
         if self.debug:
             print("stopnie obecnie: " + str(theta / np.pi * 180))
