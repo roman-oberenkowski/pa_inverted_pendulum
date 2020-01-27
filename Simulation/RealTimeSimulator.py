@@ -15,21 +15,11 @@ class RealTimeSimulator(AbstractSimulator.AbstractSimulator):
         return
 
     def simulate(self):
-        e1 = self.theta - self.inverse_pendulum.angel()
-        self.angle_regulator.calculate_real_time(e1)
-        u1 = self.angle_regulator.get_u()
-
-        e2 = self.x - self.inverse_pendulum.location()
-        self.location_regulator.calculate_real_time(e2)
-        u2 = self.location_regulator.get_u()
-
-        u = u1 - u2
-
         actual_time = time()
 
-        tp = self.last_time - actual_time
+        tp = actual_time - self.last_time
 
-        self.inverse_pendulum.calculate(tp, u)
+        self.inverse_pendulum.calculate(tp, 0)
         temp_x = self.inverse_pendulum.location()
         temp_theta = self.inverse_pendulum.angel()
 
@@ -52,6 +42,12 @@ class RealTimeSimulator(AbstractSimulator.AbstractSimulator):
 
     def start(self):
         self.last_time = time()
+
+        return
+
+    def set_target_position(self, x):
+        if self.x != x:
+            self.inverse_pendulum.set_target_position(x)
 
         return
 

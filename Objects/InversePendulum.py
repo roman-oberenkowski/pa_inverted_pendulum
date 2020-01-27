@@ -18,7 +18,6 @@ def lqr(A, B, Q, R):
     cost = integral x.T*Q*x + u.T*R*u
     """
 
-
     # ref Bertsekas, p.151
 
     # first, try to solve the ricatti equation
@@ -91,6 +90,8 @@ class InversePendulum:
         self.x = x0
         self.theta = Angle(theta0)
 
+        self.target_x = 0
+
         self.update_matrix()
 
         return
@@ -98,7 +99,7 @@ class InversePendulum:
     def calculate(self, tp, force):
         X0 = np.array([[self.omega, self.theta.value(), self.v, self.x]]).T
 
-        force = -np.dot(self.K, X0)
+        force = -np.dot(self.K, X0) + self.target_x * self.K[0][3]
 
         dX = np.dot(self.A, X0) + self.B * force
 
@@ -158,3 +159,8 @@ class InversePendulum:
 
     def get_matrix(self):
         return self.A, self.B, self.C, self.D
+
+    def set_target_position(self, x):
+        self.target_x = x
+
+        return

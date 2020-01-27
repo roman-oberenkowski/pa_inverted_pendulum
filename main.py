@@ -4,7 +4,7 @@ from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Slider, Button
 from bokeh.plotting import figure
 # data from simulation
-from Simulation import FullSimulator,RealTimeSimulator
+from Simulation import FullSimulator, RealTimeSimulator
 
 
 class InvertedPendulumVisualization:
@@ -77,37 +77,39 @@ class InvertedPendulumVisualization:
         slider_list = [self.pendulum_mass_slider, self.cart_mass_slider, self.gravity_slider,
                        self.pendulum_length_slider, self.pendulum_angle_slider, self.start_cart_position_slider,
                        self.target_cart_position_slider]
-        self.przycisk=Button(label="Simulate")
+        self.przycisk = Button(label="Simulate")
         self.przycisk.on_click(self.przycisk_handler)
         # layout
         curdoc().title = "Inverted pendulum AK TK RO"
-        self.inputs = column(children=slider_list+[self.przycisk])
+        self.inputs = column(children=slider_list + [self.przycisk])
         curdoc().add_root(column(children=[row(self.inputs, self.animation)] + plots_list))
 
         self.update_parameters(0, 0, 0)
         # callbacks
-        
+
         curdoc().add_periodic_callback(self.draw_next_frame, self.frame_time)
-        #for w in [self.pendulum_mass_slider, self.cart_mass_slider, self.gravity_slider, self.pendulum_length_slider,
+        # for w in [self.pendulum_mass_slider, self.cart_mass_slider, self.gravity_slider, self.pendulum_length_slider,
         #          self.pendulum_angle_slider, self.start_cart_position_slider, self.target_cart_position_slider]:
         #    w.on_change('value', self.update_parameters)
+
     def przycisk_handler(self, test):
         self.update_parameters(0, 0, 0)
-    
+
     def draw_next_frame(self):
-        #if self.frame >= len(self.angle_results) - 1:
+        # if self.frame >= len(self.angle_results) - 1:
         #    return
-        #theta = self.angle_results[self.frame]
-        #current_cart_position = self.position_results[self.frame]
+        # theta = self.angle_results[self.frame]
+        # current_cart_position = self.position_results[self.frame]
+        self.simulator.set_target_position(self.target_cart_position_slider.value)
         self.simulator.simulate()
         a, b, c = self.simulator.get_result()
-        print(a,b,c)
-        self.time_results.append(-a)
+        print(a, b, c)
+        self.time_results.append(a)
         self.position_results.append(b)
         self.angle_results.append(c)
-        theta=c
-        current_cart_position=b
-        
+        theta = c
+        current_cart_position = b
+
         if self.debug:
             print("stopnie obecnie: " + str(theta / np.pi * 180))
 
@@ -123,7 +125,6 @@ class InvertedPendulumVisualization:
 
         self.line_animation_data.data = self.line_temp_dict
         self.ip_animation_data.data = self.ip_temp_dict
-        #self.frame += 1
         self.graph_under_dict['x'] = self.time_results
         self.graph_under_dict['theta'] = self.angle_results
         self.graph_under_dict['position'] = self.position_results
@@ -145,30 +146,29 @@ class InvertedPendulumVisualization:
         theta = 0
         # simulator = FullSimulator.FullSimulator(0.5, 0.1, 0.2, 0.6, 0.006, 0, 0.314, 0, 0, 9.81, tk=50, tp=0.01)
         self.simulator = RealTimeSimulator.RealTimeSimulator(cart_mass, cart_rub, pendulum_mass, self.pendulum_length,
-                                                pendulum_inertia, x0, theta0, x, theta, self.gravity)
+                                                             pendulum_inertia, x0, theta0, x, theta, self.gravity)
         print(cart_mass, cart_rub, pendulum_mass, self.pendulum_length, pendulum_inertia, x0, theta0, x, theta,
               self.gravity)
         # (0.5, 0.1, 0.2, 0.6, 0.006, 0, 0, 2, 0, 9.81)
         self.simulator.start()
         self.time_results, self.position_results, self.angle_results = self.simulator.get_result()
-        self.time_results=[self.time_results]
-        self.position_results=[self.position_results]
-        self.angle_results=[self.angle_results]
+        self.time_results = [self.time_results]
+        self.position_results = [self.position_results]
+        self.angle_results = [self.angle_results]
         self.ip_temp_dict['ball_size'] = [pendulum_mass * 10]
         self.frame = 0
 
         # drawing zaleznosci czasowe (graph_under) ->
         # update xyranges
-        #time_min = min(self.time_results)
-        #time_max = max(self.time_results)
-        #pos_min = min(self.position_results)
-        #pos_max = max(self.position_results)
+        # time_min = min(self.time_results)
+        # time_max = max(self.time_results)
+        # pos_min = min(self.position_results)
+        # pos_max = max(self.position_results)
 
         # self.plot_position.y_range = Range1d(pos_min, pos_max)
         # self.plot_position.y_range = Range1d(pos_min, pos_max)
         # self.animation.x_range = Range1d(pos_min-10, pos_max+10) # fix it maybe
         # update CDS
-        
 
         self.draw_next_frame()
         # print(self.ip_temp_dict)
