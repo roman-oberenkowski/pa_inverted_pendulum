@@ -1,7 +1,33 @@
 import numpy as np
+from scipy import linalg
 from math import pi
 
 from Objects import Cart, Pendulum
+
+
+# funkcja LQR na podstawie
+# http://www.mwm.im/lqr-controllers-with-python/
+
+# opis kontorlera LQR
+# http://jtjt.pl/odwrocone-wahadlo
+def lqr(A, B, Q, R):
+    """Solve the continuous time lqr controller.
+
+    dx/dt = A x + B u
+
+    cost = integral x.T*Q*x + u.T*R*u
+    """
+
+
+    # ref Bertsekas, p.151
+
+    # first, try to solve the ricatti equation
+    X = np.matrix(linalg.solve_continuous_are(A, B, Q, R))
+
+    # compute the LQR gain
+    K = np.matrix(linalg.inv(R) * (B.T * X))
+
+    return K
 
 
 class Angle:
@@ -72,6 +98,8 @@ class InversePendulum:
     def calculate(self, tp, force):
         X0 = np.array([[self.omega, self.theta.value(), self.v, self.x]]).T
 
+        force = -np.dot(self.K, X0)
+
         dX = np.dot(self.A, X0) + self.B * force
 
         X = X0 + dX * tp
@@ -121,7 +149,10 @@ class InversePendulum:
                            [0, 0, 0, 1]])
         self.D = np.array([[0, 0]]).T
 
-        self.system = ss(self.A, self.B, self.C, self.D)
+        Q = np.diagflat([0, 1000, 0, 100])
+        R = np.array([[1]])
+
+        self.K = np.array(lqr(self.A, self.B, Q, R))
 
         return
 
