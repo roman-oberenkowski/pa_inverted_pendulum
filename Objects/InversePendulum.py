@@ -1,7 +1,6 @@
 import numpy as np
 from math import pi
 
-from control.matlab import *
 from Objects import Cart, Pendulum
 
 
