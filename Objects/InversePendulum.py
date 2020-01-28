@@ -102,29 +102,7 @@ class InversePendulum:
         force = -np.dot(self.K, X0) + self.target_x * self.K[0][3]
 
         # model liniowy
-        # dX = np.dot(self.A, X0) + self.B * force
-
-        # model pełny (nieliniowy)
-        dX = np.array(4, 1)
-
-        mass = self.pendulum.mass() + self.cart.mass()
-        inertia = self.pendulum.inertia() + self.pendulum.mass() * self.pendulum.length() ** 2
-
-        q = (self.pendulum.mass() * self.pendulum.length()) ** 2 - mass * inertia
-
-        self.epsilon = (force * self.pendulum.mass() * self.pendulum.length() * cos(self.theta) -
-                        self.cart.rub() * self.pendulum.mass() * self.pendulum.length() * self.v * cos(self.theta) -
-                        mass * self.pendulum.mass() * self.pendulum.length() * self.g * sin(self.theta) +
-                        sin(self.theta) * cos(self.theta) * (self.pendulum.mass() * self.pendulum.length() * self.omega) ** 2) \
-                       / q
-        self.a = (inertia * (-force + self.cart.rub() * self.v -
-                             sin(self.theta) * self.pendulum.mass() * self.pendulum.length() * self.omega ** 2) +
-                  sin(self.theta) * cos(self.theta) * self.g * (self.pendulum.mass() * self.pendulum.length()) ** 2)
-
-        dX[0][0] = X0[0][1]
-        dX[0][1] = self.epsilon
-        dX[0][2] = X0[0][3]
-        dX[0][3] = self.a
+        dX = np.dot(self.A, X0) + self.B * force
 
         X = X0 + dX * tp
 

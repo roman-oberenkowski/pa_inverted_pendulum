@@ -61,6 +61,10 @@ class InvertedPendulumVisualization:
         self.plot_line_position = self.plot_position.line(
             'x', 'position', source=self.graph_under_cds)
         plots_list = [self.plot_theta, self.plot_position]
+        self.plot_position.xaxis.axis_label = 'Time [s]'
+        self.plot_position.yaxis.axis_label = 'Position [m]'
+        self.plot_theta.xaxis.axis_label = 'Time [s]'
+        self.plot_theta.yaxis.axis_label = 'Angle [rad]'
         # self.plot_theta.
         # Set up widgets-> SLIDERS:
         self.pendulum_mass_slider = Slider(
