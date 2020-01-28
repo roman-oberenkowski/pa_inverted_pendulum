@@ -46,8 +46,7 @@ class RealTimeSimulator(AbstractSimulator.AbstractSimulator):
         return
 
     def set_target_position(self, x):
-        if self.x != x:
-            self.inverse_pendulum.set_target_position(x)
+        self.inverse_pendulum.set_target_position(x)
 
         return
 
